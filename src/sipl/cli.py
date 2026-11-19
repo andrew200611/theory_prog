@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -36,6 +38,14 @@ from sipl.visualization import (
 
 def _configure_utf8_streams() -> None:
     """Ensure stdout/stderr support Unicode symbols on Windows consoles."""
+    if sys.platform == "win32":
+        windll = getattr(ctypes, "windll", None)
+        if windll is not None:
+            try:
+                windll.kernel32.SetConsoleOutputCP(65001)
+                windll.kernel32.SetConsoleCP(65001)
+            except (AttributeError, OSError):
+                pass
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
         if callable(reconfigure):
@@ -43,6 +53,44 @@ def _configure_utf8_streams() -> None:
                 reconfigure(encoding="utf-8", errors="replace")
             except OSError:
                 pass
+
+
+def _to_console_ascii(text: str) -> str:
+    """Replace math/logic Unicode symbols unsupported by legacy Windows console fonts."""
+    replacements = (
+        ("\u0304", ""),
+        ("\u21a6", "->"),
+        ("\u2192", "->"),
+        ("\u21d2", "=>"),
+        ("\u2080", "_0"),
+        ("\u2070", "^0"),
+        ("\u2212", "-"),
+        (" \u00b7 ", " . "),
+        ("\u00b7", "*"),
+        ("\u2207", " (+) "),
+        ("\u2193", " [defined]"),
+        ("\u2191", " [undefined]"),
+        ("\u2260", "!="),
+        ("\u2264", "<="),
+        ("\u2265", ">="),
+        ("\u00ac", "not "),
+        ("\u2228", "or"),
+        ("\u2227", "and"),
+    )
+    out = text
+    for src, dst in replacements:
+        out = out.replace(src, dst)
+    return out
+
+
+def _is_ascii_mode(args: argparse.Namespace) -> bool:
+    if getattr(args, "ascii", False):
+        return True
+    return os.environ.get("SIPL_ASCII", "").strip().lower() in ("1", "true", "yes")
+
+
+def _print_text(text: str, args: argparse.Namespace) -> None:
+    print(_to_console_ascii(text) if _is_ascii_mode(args) else text)
 
 
 def _print_json(payload: Any) -> None:
@@ -192,10 +240,10 @@ def _cmd_parse(args: argparse.Namespace) -> int:
         )
         return 0 if result.is_crown_valid else 1
 
-    print(render_ast_text(result))
+    _print_text(render_ast_text(result), args)
     print()
-    print(f"Крона дерева: {result.crown_text}")
-    print(f"Нумерована крона: {result.parse_tree.numbered_crown()}")
+    _print_text(f"Крона дерева: {result.crown_text}", args)
+    _print_text(f"Нумерована крона: {result.parse_tree.numbered_crown()}", args)
     status = "OK" if result.is_crown_valid else "MISMATCH"
     print(f"Синтаксична перевірка крони дерева: {status}")
     return 0 if result.is_crown_valid else 1
@@ -248,11 +296,11 @@ def _cmd_term(args: argparse.Namespace) -> int:
     if args.json or args.format == "json":
         _print_json(term_res.to_dict())
     elif args.format == "unicode":
-        print(term_res.format_unicode())
+        _print_text(term_res.format_unicode(), args)
     elif args.format == "latex":
         print(term_res.format_latex())
     else:
-        print(term_res.format_derivation_text())
+        _print_text(term_res.format_derivation_text(), args)
         print(f"LaTeX: {term_res.format_latex()}")
     return 0
 
@@ -281,7 +329,7 @@ def _cmd_eval(args: argparse.Namespace) -> int:
     if args.json:
         _print_json(eval_res.to_dict())
     else:
-        print(eval_res.explanation_text)
+        _print_text(eval_res.explanation_text, args)
     return 0 if eval_res.defined else 1
 
 
@@ -349,7 +397,7 @@ def _cmd_prove(args: argparse.Namespace) -> int:
     if args.json:
         _print_json(report.to_dict())
     else:
-        print(report.explanation_text)
+        _print_text(report.explanation_text, args)
 
     return 1 if report.status == "disproved" else 0
 
@@ -447,6 +495,8 @@ def _cmd_visualize(args: argparse.Namespace) -> int:
 
     if args.json and fmt not in ("json", "ast-json"):
         _print_json({"file": args.file, "format": fmt, "content": rendered})
+    elif fmt in ("text", "ast-text"):
+        _print_text(rendered, args)
     else:
         print(rendered)
     return 0
@@ -470,9 +520,9 @@ def _cmd_run(args: argparse.Namespace) -> int:
     if args.json:
         _print_json(exec_res.to_dict())
     else:
-        print(f"Initial state: {exec_res.initial_state.format_course()}")
+        _print_text(f"Initial state: {exec_res.initial_state.format_course()}", args)
         if exec_res.is_defined and exec_res.final_state is not None:
-            print(f"Final state:   {exec_res.final_state.format_course()}")
+            _print_text(f"Final state:   {exec_res.final_state.format_course()}", args)
             print(f"Steps:         {exec_res.steps_executed}")
         else:
             print(f"Status:        undefined [{exec_res.error_code}] {exec_res.error}")
@@ -513,12 +563,13 @@ def _cmd_trace(args: argparse.Namespace) -> int:
         for ev in exec_res.trace.events:
             st_str = State(ev.state).format_course()
             details_str = f" {ev.details}" if ev.details else ""
-            print(
+            _print_text(
                 f"  [{ev.step:>3}] {ev.event_type:<20} {ev.statement_kind:<8} "
-                f"({ev.node_id}){details_str} -> {st_str}"
+                f"({ev.node_id}){details_str} -> {st_str}",
+                args,
             )
         if exec_res.is_defined and exec_res.final_state is not None:
-            print(f"Final state: {exec_res.final_state.format_course()}")
+            _print_text(f"Final state: {exec_res.final_state.format_course()}", args)
         else:
             print(f"Status: undefined [{exec_res.error_code}] {exec_res.error}")
     return 0 if exec_res.is_defined else 1
@@ -537,6 +588,12 @@ def _add_common_flags(parser: argparse.ArgumentParser, *, is_subparser: bool) ->
         action="store_true",
         default=default_val,
         help="Output machine-readable JSON",
+    )
+    parser.add_argument(
+        "--ascii",
+        action="store_true",
+        default=default_val,
+        help="Render math symbols as ASCII (or set SIPL_ASCII=1) for legacy consoles",
     )
 
 
