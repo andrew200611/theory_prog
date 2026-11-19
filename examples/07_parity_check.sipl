@@ -1,0 +1,8 @@
+begin
+    R := 1;
+    while N > 0 do
+    begin
+        if R = 1 then R := 0 else R := 1;
+        N := N - 1
+    end
+end

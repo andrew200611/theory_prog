@@ -1,0 +1,19 @@
+{
+  "name": "02_div_xy",
+  "title": "Integer division with remainder (x div y)",
+  "program": "examples/02_div_xy.sipl",
+  "precondition": "X >= 0 and Y > 0",
+  "postcondition": "X_0 = R * Y + X and 0 <= X and X < Y",
+  "hypothesis": "X_0 = R * Y + X and X >= 0 and Y > 0",
+  "backward_invariants": [
+    "X < Y and X >= 0 -> X_0 = R * Y + X and 0 <= X and X < Y",
+    "X >= Y -> X_0 = (R + 1) * Y + (X - Y) and X - Y >= 0",
+    "X_0 = 0 * Y + X_0 and X_0 >= 0"
+  ],
+  "test_domains": [
+    {"input": {"X": 17, "Y": 5}, "expected": {"R": 3, "X": 2}},
+    {"input": {"X": 20, "Y": 4}, "expected": {"R": 5, "X": 0}},
+    {"input": {"X": 3, "Y": 7}, "expected": {"R": 0, "X": 3}},
+    {"input": {"X": 0, "Y": 5}, "expected": {"R": 0, "X": 0}}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "01_power_xy",
+  "title": "Integer exponentiation (x^y)",
+  "program": "examples/01_power_xy.sipl",
+  "precondition": "Y >= 0",
+  "postcondition": "R = X_0 ^ Y_0",
+  "hypothesis": "R * X ^ Y = X_0 ^ Y_0 and Y >= 0",
+  "backward_invariants": [
+    "Y = 0 -> R = R * X ^ 0",
+    "Y > 0 -> (R * X) * X ^ (Y - 1) = R * X ^ Y and Y - 1 >= 0",
+    "1 * X ^ Y = X ^ Y and Y >= 0"
+  ],
+  "test_domains": [
+    {"input": {"X": 2, "Y": 0}, "expected": {"R": 1, "Y": 0}},
+    {"input": {"X": 2, "Y": 5}, "expected": {"R": 32, "Y": 0}},
+    {"input": {"X": 3, "Y": 4}, "expected": {"R": 81, "Y": 0}},
+    {"input": {"X": 5, "Y": 1}, "expected": {"R": 5, "Y": 0}},
+    {"input": {"X": 0, "Y": 3}, "expected": {"R": 0, "Y": 0}}
+  ]
+}

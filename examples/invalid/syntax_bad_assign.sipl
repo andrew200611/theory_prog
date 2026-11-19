@@ -1,0 +1,4 @@
+begin
+    R = 1;
+    X := R + 2
+end

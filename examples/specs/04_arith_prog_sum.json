@@ -1,0 +1,19 @@
+{
+  "name": "04_arith_prog_sum",
+  "title": "Arithmetic progression sum (2 + 4 + ... + 2n)",
+  "program": "examples/04_arith_prog_sum.sipl",
+  "precondition": "N >= 0",
+  "postcondition": "S = N * (N + 1) and I = N",
+  "hypothesis": "S = I * (I + 1) and 0 <= I and I <= N",
+  "backward_invariants": [
+    "not (N > I) and I <= N -> I = N and S = N * (N + 1)",
+    "N > I -> S + 2 * (I + 1) = (I + 1) * (I + 2) and I + 1 <= N",
+    "0 = 0 * (0 + 1) and 0 <= N"
+  ],
+  "test_domains": [
+    {"input": {"N": 0}, "expected": {"S": 0, "I": 0}},
+    {"input": {"N": 1}, "expected": {"S": 2, "I": 1}},
+    {"input": {"N": 4}, "expected": {"S": 20, "I": 4}},
+    {"input": {"N": 6}, "expected": {"S": 42, "I": 6}}
+  ]
+}

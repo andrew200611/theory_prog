@@ -1,0 +1,80 @@
+(* ============================================================================
+ * SIPL (SImple Programming Language) Formal EBNF Grammar
+ * Course: "Theory of Programming" (KNU, FCSC)
+ * Reference: Lecture 1-2 (pp. 4-10) & Practice Workbook (pp. 8-11, 23)
+ * ============================================================================ *)
+
+(* --- Program (Prog, P) --- *)
+program         = "begin" , statement , "end" ;                       (* NP1 *)
+
+(* --- Statements (Stm, S) ---
+ * Precedence (highest to lowest among statements):
+ *   1. begin ... end, x := a, skip
+ *   2. while b do S
+ *   3. if b then S1 else S2
+ *   4. S1 ; S2  (left-associative)
+ *)
+statement       = seq_statement ;
+seq_statement   = atomic_stm , { ";" , atomic_stm } ;                 (* NS2: left-assoc *)
+atomic_stm      = assign_stm
+                | if_stm
+                | while_stm
+                | block_stm
+                | skip_stm ;
+
+assign_stm      = variable , ":=" , aexp ;                            (* NS1 *)
+if_stm          = "if" , bexp , "then" , atomic_stm , "else" , atomic_stm ; (* NS3 *)
+while_stm       = "while" , bexp , "do" , atomic_stm ;                (* NS4 *)
+block_stm       = "begin" , statement , "end" ;                       (* NS5 *)
+skip_stm        = "skip" ;                                            (* NS6 *)
+
+(* --- Arithmetic Expressions (Aexp, a) ---
+ * Precedence (highest to lowest):
+ *   1. Num, Var, ( a )
+ *   2. *, div*, mod*  (left-associative; * = extended when strict_bnf=False)
+ *   3. +, -           (left-associative)
+ *)
+aexp            = add_aexp ;
+add_aexp        = mul_aexp , { ( "+" | "-" ) , mul_aexp } ;           (* NA3, NA4 *)
+mul_aexp        = atom_aexp , { mul_op , atom_aexp } ;                (* NA5, NA_DIV*, NA_MOD* *)
+mul_op          = "*"
+                (* Extended (strict_bnf=False): *)
+                | "div" | "mod" ;
+atom_aexp       = number                                              (* NA1 *)
+                | variable                                            (* NA2 *)
+                | "(" , aexp , ")" ;                                  (* NA6 *)
+
+(* --- Boolean Expressions / Conditions (Bexp, b) ---
+ * Precedence (highest to lowest):
+ *   1. ( b ), comparison (a1 = a2, a1 > a2, ...)  [HIGHER than ¬ !]
+ *   2. ¬ / not  (unary prefix)
+ *   3. ∧ / and* (left-associative, extended when strict_bnf=False)
+ *   4. ∨ / or   (left-associative)
+ *)
+bexp            = or_bexp ;
+or_bexp         = and_bexp , { or_op , and_bexp } ;                   (* NB3 *)
+or_op           = "∨" | "||" | "or" ;
+and_bexp        = not_bexp , { and_op , not_bexp } ;                  (* NB_AND* *)
+and_op          = "∧" | "&&" | "and" ;                                (* Extended *)
+not_bexp        = not_op , not_bexp                                   (* NB4 *)
+                | atom_bexp ;
+not_op          = "¬" | "!" | "~" | "not" ;
+atom_bexp       = compare_bexp
+                | "(" , bexp , ")" ;                                  (* NB5 *)
+compare_bexp    = aexp , cmp_op , aexp ;
+cmp_op          = "="                                                 (* NB1 *)
+                | ">"                                                 (* NB2 *)
+                (* Extended (strict_bnf=False): *)
+                | ">=" | "≥"                                          (* NB_GE* *)
+                | "<"                                                 (* NB_LT* *)
+                | "<=" | "≤"                                          (* NB_LE* *)
+                | "!=" | "≠" | "<>" ;                                 (* NB_NE* *)
+
+(* --- Lexical Categories --- *)
+variable        = ident ;                                             (* NV *)
+number          = [ "-" ] , digits ;                                  (* NN *)
+
+ident           = letter , { letter | digit | "_" } ;
+digits          = digit , { digit } ;
+letter          = "A".."Z" | "a".."z" | "_" ;
+digit           = "0".."9" ;
