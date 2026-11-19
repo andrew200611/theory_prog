@@ -141,8 +141,6 @@ $ sipl prove examples/invalid/buggy_power_init.sipl --spec examples/specs/01_pow
 
 - [grammar/sipl.ebnf](grammar/sipl.ebnf) — формальна EBNF-граматика SIPL.
 - [grammar/SPECIFICATION.md](grammar/SPECIFICATION.md) — правила `NP1`..`NN`, розширення практикуму, пріоритети операторів.
-- [docs/DEFENSE_GUIDE.md](docs/DEFENSE_GUIDE.md) — довідник для захисту курсового проєкту (чекліст пп. 10 та 13, теорія, обмеження автоматизації).
-- [CHANGELOG.md](CHANGELOG.md) — історія версій SemVer.
 - Демонстраційні артефакти в `docs/artifacts/`:
   - `01_power_xy_parse_tree.svg`, `01_power_xy_parse_tree.dot`, `01_power_xy_ast.svg`, `01_power_xy_pipeline.html`, `01_power_xy_proof.md`
   - `02_div_xy_parse_tree.svg`, `02_div_xy_pipeline.html`, `02_div_xy_proof.md`
