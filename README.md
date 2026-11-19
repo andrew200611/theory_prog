@@ -1,6 +1,6 @@
 # SIPL Language Toolkit (`sipl-toolkit`)
 
-Інструментарій для формальної мови програмування **SIPL** (*SImple Programming Language*) з курсу **«Теорія програмування»** (КНУ імені Тараса Шевченка, ФКНК).
+Інструментарій для формальної мови програмування **SIPL** (*SImple Programming Language*) з курсу **«Теорія програмування»**.
 
 Проєкт реалізує повний ланцюжок компіляторного та формально-семантичного аналізу SIPL: формальну EBNF-граматику, лексер, рекурсивний низхідний парсер, конкретне дерево розбору з перевіркою крони, типізований AST, інтерпретатор станів з трасуванням подій, алгебраїчну семантику програми $\mathcal{A}_{\mathrm{SIPL}}$ (побудова термів та покрокове обчислення), автоматизоване індуктивне доведення коректності, інтерактивну візуалізацію (SVG / DOT / HTML5) та CLI.
 
@@ -136,41 +136,6 @@ $ sipl prove examples/invalid/buggy_power_init.sipl --spec examples/specs/01_pow
 
 ---
 
-## Використання Python API
-
-```python
-from pathlib import Path
-from sipl import (
-    State,
-    build_semantic_term,
-    evaluate_semantic_term,
-    parse_program,
-    prove_program,
-    render_pipeline_html,
-)
-
-source = Path("examples/01_power_xy.sipl").read_text(encoding="utf-8")
-parsed = parse_program(source, strict_bnf=True)
-assert parsed.is_crown_valid
-
-term_res = build_semantic_term(parsed.ast, source_program=source)
-eval_res = evaluate_semantic_term(term_res.term, State({"X": 2, "Y": 5}))
-proof_res = prove_program(
-    parsed.ast,
-    precondition="Y >= 0",
-    postcondition="R = X_0 ^ Y_0",
-    mode="hybrid",
-)
-
-html = render_pipeline_html(
-    parsed,
-    semantic_term=term_res,
-    eval_result=eval_res,
-    proof_result=proof_res,
-)
-```
-
----
 
 ## Демонстраційні артефакти та документація
 
