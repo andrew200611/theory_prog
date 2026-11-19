@@ -148,11 +148,4 @@ $ sipl prove examples/invalid/buggy_power_init.sipl --spec examples/specs/01_pow
 
 ---
 
-## Перевірка якості та тести
 
-```bash
-ruff check src tests
-mypy src
-pytest -v --cov=sipl --cov-report=term-missing
-uv build
-```
