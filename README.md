@@ -20,7 +20,7 @@
 | `REL-02` | Семантичне версіонування, `CHANGELOG.md`, збірка пакету (`.whl`/`.tar.gz`) і тег `v1.0.0` | 0.5 | `CHANGELOG.md`, `pyproject.toml`, `dist/` |
 | **Разом** | | **10.0** | |
 
-### Додатково реалізовані модулі інфраструктури та інтеграції
+### Додатково реалізовані модулі інфраструктури та інтеграції для зручності
 
 - `CORE-01`: Формальна специфікація BNF/EBNF і діагностики з `SourceSpan` ([grammar/sipl.ebnf](grammar/sipl.ebnf), [grammar/SPECIFICATION.md](grammar/SPECIFICATION.md), `src/sipl/diagnostics.py`).
 - `CORE-03` & `CORE-04`: Алгебра станів `A_State = <State; ∇>`, операційний AST-інтерпретатор та структуроване трасування подій (`src/sipl/interpreter/`).
