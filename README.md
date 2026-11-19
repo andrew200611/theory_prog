@@ -26,7 +26,7 @@
 - `CORE-03` & `CORE-04`: Алгебра станів `A_State = <State; ∇>`, операційний AST-інтерпретатор та структуроване трасування подій (`src/sipl/interpreter/`).
 - `CORE-05`: Єдиний CLI `sipl` з 8 підкомандами та підтримкою `--json` (`src/sipl/cli.py`).
 - `VIS-02` & `SEM-03`: Експортери AST, інтерактивне порівняння `ParseTree ↔ AST` та 5-панельний синхронізований HTML5-візуалізатор конвеєра (`src/sipl/visualization/exporters.py`).
-- `REL-01`: CI-конвеєр GitHub Actions для Linux та Windows ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+.
 
 ---
 
